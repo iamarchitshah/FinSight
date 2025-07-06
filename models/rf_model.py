@@ -28,12 +28,12 @@ def train_rf_model(df):
 
     return rf_open, rf_close, scaler
 
-def predict_next_7_days(df, model_open, model_close, scaler):
+def predict_next_7_days(df, model_open, model_close, scaler, num_prediction_days):
     features = ['Open', 'High', 'Low', 'Close', 'Volume', 'RSI', 'MA20', 'MA50', 'BB_upper', 'BB_lower', 'MFI']
-    last_days = df[-7:].copy()
+    last_days = df[-num_prediction_days:].copy() # Adjust based on num_prediction_days
     future_predictions = []
 
-    for _ in range(7):
+    for _ in range(num_prediction_days):
         input_scaled = scaler.transform(last_days[features])
         pred_open = model_open.predict(input_scaled[-1].reshape(1, -1))[0]
         pred_close = model_close.predict(input_scaled[-1].reshape(1, -1))[0]
@@ -53,6 +53,7 @@ def predict_next_7_days(df, model_open, model_close, scaler):
         }
 
         future_predictions.append([pred_open, pred_close])
-        last_days = last_days.append(predicted_row, ignore_index=True)
+        predicted_df_row = pd.DataFrame([predicted_row], index=[last_days.index[-1] + pd.Timedelta(days=1)])
+        last_days = pd.concat([last_days, predicted_df_row])
 
     return pd.DataFrame(future_predictions, columns=['Predicted_Open', 'Predicted_Close'])
