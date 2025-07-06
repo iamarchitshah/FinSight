@@ -88,20 +88,40 @@ if predict_btn:
 
     st.success("✅ Data loaded and indicators added")
 
-    with st.spinner("Training SVM & RF models..."):
-        svm_open, svm_close, svm_scaler = train_svm_model(df)
-        rf_open, rf_close, rf_scaler = train_rf_model(df)
+    # Check for minimum rows for models
+    if len(df) < 60:
+        st.error(f"Not enough data for model training. At least 60 rows are required after indicators, but only {len(df)} rows are available. Please select a longer date range.")
+        st.stop()
+    if len(df) < 7:
+        st.error(f"Not enough data for prediction. At least 7 rows are required after indicators, but only {len(df)} rows are available. Please select a longer date range.")
+        st.stop()
 
-        svm_preds = svm_predict(df, svm_open, svm_close, svm_scaler)
-        rf_preds = rf_predict(df, rf_open, rf_close, rf_scaler)
+    try:
+        with st.spinner("Training SVM & RF models..."):
+            svm_open, svm_close, svm_scaler = train_svm_model(df)
+            rf_open, rf_close, rf_scaler = train_rf_model(df)
 
-    with st.spinner("Training LSTM model..."):
-        lstm_open, lstm_close, lstm_scaler, lstm_df_scaled, feature_cols = train_lstm_model(df)
-        lstm_preds = predict_lstm_next_7_days(lstm_df_scaled, lstm_open, lstm_close, lstm_scaler, feature_cols)
+            svm_preds = svm_predict(df, svm_open, svm_close, svm_scaler)
+            rf_preds = rf_predict(df, rf_open, rf_close, rf_scaler)
+    except Exception as e:
+        st.error(f"Error during SVM/RF model training or prediction: {e}")
+        st.stop()
 
-    with st.spinner("Training RNN model..."):
-        rnn_open, rnn_close, rnn_scaler, rnn_df_scaled, feature_cols = train_rnn_model(df)
-        rnn_preds = predict_rnn_next_7_days(rnn_df_scaled, rnn_open, rnn_close, rnn_scaler, feature_cols)
+    try:
+        with st.spinner("Training LSTM model..."):
+            lstm_open, lstm_close, lstm_scaler, lstm_df_scaled, feature_cols = train_lstm_model(df)
+            lstm_preds = predict_lstm_next_7_days(lstm_df_scaled, lstm_open, lstm_close, lstm_scaler, feature_cols)
+    except Exception as e:
+        st.error(f"Error during LSTM model training or prediction: {e}")
+        st.stop()
+
+    try:
+        with st.spinner("Training RNN model..."):
+            rnn_open, rnn_close, rnn_scaler, rnn_df_scaled, feature_cols = train_rnn_model(df)
+            rnn_preds = predict_rnn_next_7_days(rnn_df_scaled, rnn_open, rnn_close, rnn_scaler, feature_cols)
+    except Exception as e:
+        st.error(f"Error during RNN model training or prediction: {e}")
+        st.stop()
 
     # Combine all predictions
     ensemble_df = combine_ensemble_predictions(svm_preds, rf_preds, lstm_preds, rnn_preds)
