@@ -1,4 +1,5 @@
 # app.py
+import os
 
 import streamlit as st
 import pandas as pd
@@ -11,6 +12,7 @@ from rf_model import train_rf_model, predict_next_7_days as rf_predict
 from lstm_model import train_lstm_model, predict_lstm_next_7_days
 from rnn_model import train_rnn_model, predict_rnn_next_7_days
 from aggregator import combine_ensemble_predictions
+os.environ["XDG_CONFIG_HOME"] = os.path.join(os.getcwd(), ".streamlit")
 
 st.set_page_config(page_title="Stock Forecast App", layout="wide", initial_sidebar_state="expanded")
 
