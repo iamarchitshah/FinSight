@@ -2,7 +2,6 @@
 
 from alpha_vantage.timeseries import TimeSeries
 import pandas as pd
-import requests # Add requests to handle potential HTTP errors directly
 
 def fetch_stock_data(ticker, start_date, end_date, api_key):
     if not api_key:
@@ -16,7 +15,7 @@ def fetch_stock_data(ticker, start_date, end_date, api_key):
         data, meta_data = ts.get_daily(symbol=ticker, outputsize='full')
         
         if data.empty:
-            print(f"No data found for {ticker} from Alpha Vantage (TIME_SERIES_DAILY). It might be due to a rate limit, invalid ticker, or no data for the selected period.")
+            print(f"No data found for {ticker} from Alpha Vantage (TIME_SERIES_DAILY).")
             return None
 
         # Alpha Vantage returns column names like '1. open', '2. high', etc.
@@ -34,19 +33,10 @@ def fetch_stock_data(ticker, start_date, end_date, api_key):
         
         df.dropna(inplace=True)
         if df.empty:
-            print(f"No data found for {ticker} within the specified date range ({start_date} to {end_date}) after filtering and dropping NaNs.")
             return None
         return df
     except Exception as e:
-        # More specific error handling for Alpha Vantage API issues
-        if "Thank you for using Alpha Vantage! Our standard API call frequency is 5 calls per minute and 500 calls per day." in str(e):
-            print(f"Alpha Vantage API rate limit exceeded for {ticker}. Please wait a minute and try again, or consider upgrading your plan.")
-        elif "Invalid API key" in str(e):
-            print("Alpha Vantage API key is invalid. Please check your .streamlit/secrets.toml file.")
-        elif isinstance(e, requests.exceptions.ConnectionError):
-            print(f"Connection error when fetching data for {ticker}. Please check your internet connection.")
-        else:
-            print(f"An unexpected error occurred while fetching data for {ticker} from Alpha Vantage: {e}")
+        print(f"Failed to fetch data for {ticker} from Alpha Vantage: {e}")
         return None
 
 if __name__ == "__main__":
