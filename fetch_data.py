@@ -18,18 +18,19 @@ def fetch_stock_data(ticker, start_date, end_date, api_key):
             print(f"No data found for {ticker} from Alpha Vantage (TIME_SERIES_DAILY).")
             return None
 
-        # Alpha Vantage returns column names like '1. open', '2. high', etc.
+        # Rename columns to match expected format for TIME_SERIES_DAILY
         data.columns = [
-            '1. open', '2. high', '3. low', '4. close', '5. volume' # Alpha Vantage column names
+            '1. open', '2. high', '3. low', '4. close', '5. volume' # Corrected Alpha Vantage column names
         ]
         df = data[['1. open', '2. high', '3. low', '4. close', '5. volume']].copy()
         
         # Rename to generic names for consistency in other modules
         df.columns = ['Open', 'High', 'Low', 'Close', 'Volume']
 
+        # Filter by date range (Alpha Vantage returns all history by default)
         # Ensure index is datetime for .loc to work correctly
         df.index = pd.to_datetime(df.index)
-        df = df.loc[start_date:end_date] # Filter by date range
+        df = df.loc[start_date:end_date]
         
         df.dropna(inplace=True)
         if df.empty:
