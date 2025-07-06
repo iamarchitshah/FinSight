@@ -4,6 +4,7 @@ import os
 import streamlit as st
 import pandas as pd
 import datetime
+import numpy as np
 
 
 from indicators import add_technical_indicators
@@ -76,9 +77,27 @@ if predict_btn:
 
     df = fetch_stock_data(stock_symbol, str(start_date), str(end_date))
     if df is None or df.empty:
-        st.error("No data found from Yahoo Finance for the selected stock and date range. Please try a different range or stock.")
-        st.stop()
-    st.write(f"Fetched {len(df)} rows from Yahoo Finance.")
+        st.warning(f"No data found for {stock_symbol}. Trying fallback ticker 'RELIANCE.NS'...")
+        fallback_symbol = "RELIANCE.NS"
+        df = fetch_stock_data(fallback_symbol, str(start_date), str(end_date))
+        if df is None or df.empty:
+            st.warning("Fallback ticker also failed. Loading sample data...")
+            sample_path = "sample_data.csv"
+            if os.path.exists(sample_path):
+                df = pd.read_csv(sample_path, index_col=0, parse_dates=True)
+                st.info("Loaded sample data from sample_data.csv.")
+            else:
+                # Generate random sample data
+                dates = pd.date_range(start=start_date, periods=100)
+                df = pd.DataFrame({
+                    'Open': np.random.uniform(1000, 2000, size=100),
+                    'High': np.random.uniform(1000, 2000, size=100),
+                    'Low': np.random.uniform(1000, 2000, size=100),
+                    'Close': np.random.uniform(1000, 2000, size=100),
+                    'Volume': np.random.randint(100000, 500000, size=100)
+                }, index=dates)
+                st.info("Generated random sample data.")
+    st.write(f"Fetched {len(df)} rows from Yahoo Finance or fallback.")
 
     df = add_technical_indicators(df)
     st.write(f"Rows remaining after adding indicators: {len(df)}")
