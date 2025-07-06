@@ -147,5 +147,8 @@ if predict_btn:
     st.line_chart(ensemble_df)
 
     # Save results
-    ensemble_df.to_csv("results/predictions.csv")
+    results_dir = "results"
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+    ensemble_df.to_csv(os.path.join(results_dir, "predictions.csv"))
     st.success("✅ Prediction complete. CSV saved as `results/predictions.csv`")
