@@ -82,21 +82,16 @@ if predict_btn:
         df = fetch_stock_data(fallback_symbol, str(start_date), str(end_date))
         if df is None or df.empty:
             st.warning("Fallback ticker also failed. Loading sample data...")
-            sample_path = "sample_data.csv"
-            if os.path.exists(sample_path):
-                df = pd.read_csv(sample_path, index_col=0, parse_dates=True)
-                st.info("Loaded sample data from sample_data.csv.")
-            else:
-                # Generate random sample data
-                dates = pd.date_range(start=start_date, periods=100)
-                df = pd.DataFrame({
-                    'Open': np.random.uniform(1000, 2000, size=100),
-                    'High': np.random.uniform(1000, 2000, size=100),
-                    'Low': np.random.uniform(1000, 2000, size=100),
-                    'Close': np.random.uniform(1000, 2000, size=100),
-                    'Volume': np.random.randint(100000, 500000, size=100)
-                }, index=dates)
-                st.info("Generated random sample data.")
+            sample_size = 120  # Increased to ensure enough rows after indicators
+            dates = pd.date_range(start=start_date, periods=sample_size)
+            df = pd.DataFrame({
+                'Open': np.random.uniform(1000, 2000, size=sample_size),
+                'High': np.random.uniform(1000, 2000, size=sample_size),
+                'Low': np.random.uniform(1000, 2000, size=sample_size),
+                'Close': np.random.uniform(1000, 2000, size=sample_size),
+                'Volume': np.random.randint(100000, 500000, size=sample_size)
+            }, index=dates)
+            st.info("Generated random sample data.")
     st.write(f"Fetched {len(df)} rows from Yahoo Finance or fallback.")
 
     df = add_technical_indicators(df)
