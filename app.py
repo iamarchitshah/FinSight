@@ -6,8 +6,8 @@ import pandas as pd
 import datetime
 
 
-from utils.indicators import add_technical_indicators
-from utils.fetch_data import fetch_stock_data
+from indicators import add_technical_indicators
+from fetch_data import fetch_stock_data
 
 from models.svm_model import train_svm_model, predict_next_7_days as svm_predict
 from models.rf_model import train_rf_model, predict_next_7_days as rf_predict
