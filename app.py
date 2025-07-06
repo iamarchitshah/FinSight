@@ -60,7 +60,16 @@ tickers = {
 selected_company = st.sidebar.selectbox("📈 Select an NSE Stock", list(tickers.keys()))
 stock_symbol = tickers[selected_company]
 
-start_date = st.sidebar.date_input("Start Date", datetime.date(2022, 1, 1))
+# User selects the start date of historical data
+start_date = st.sidebar.date_input("Historical Data Start Date", datetime.date(2022, 1, 1))
+
+# User selects how many days of data to use for training (from the start date)
+num_historical_days = st.sidebar.number_input("Historical Days for Training", min_value=60, max_value=1825, value=365,
+                                              help="Number of past days' data to use for training models, starting from the selected 'Historical Data Start Date' (min 60 days required).")
+
+# Calculate the end date for fetching historical data
+end_date_historical = start_date + datetime.timedelta(days=num_historical_days)
+
 num_prediction_days = st.sidebar.number_input("🔮 Predict Next N Days", min_value=1, max_value=30, value=7)
 predict_btn = st.sidebar.button("🔮 Generate Prediction")
 
@@ -75,23 +84,21 @@ if predict_btn:
         st.error("Alpha Vantage API key not found. Please set it in .streamlit/secrets.toml")
         st.stop()
 
-    # Check minimum date range for historical data to train models
-    min_historical_days = 60 # At least 60 days needed for MA50, and LSTM/RNN time_steps
-    
-    # Calculate days between start_date and today to check if enough historical data is requested
-    if (datetime.date.today() - start_date).days < min_historical_days:
-        st.error(f"Please select a 'Start Date' that provides at least {min_historical_days} days of historical data for meaningful predictions. (e.g., set Start Date to {datetime.date.today() - datetime.timedelta(days=min_historical_days + 30)} or earlier)") # Add buffer
+    # Validate the number of historical days selected
+    if num_historical_days < 60:
+        st.error("'Historical Days for Training' must be at least 60 for meaningful predictions.")
         st.stop()
 
-    df = fetch_stock_data(stock_symbol, str(start_date), str(datetime.date.today()), api_key) # Pass api_key
+    df = fetch_stock_data(stock_symbol, str(start_date), str(end_date_historical), api_key) # Pass api_key
 
     if df is None or df.empty:
-        st.warning(f"No data found for {stock_symbol}. Trying fallback ticker 'RELIANCE.BSE'...") # Updated fallback ticker
-        fallback_symbol = "RELIANCE.BSE" # Ensured consistency here for Alpha Vantage
-        df = fetch_stock_data(fallback_symbol, str(start_date), str(datetime.date.today()), api_key) # Pass api_key to fallback
+        st.warning(f"No data found for {stock_symbol}. Trying fallback ticker 'RELIANCE.BSE'...") # Fallback for Alpha Vantage
+        fallback_symbol = "RELIANCE.BSE" 
+        df = fetch_stock_data(fallback_symbol, str(start_date), str(end_date_historical), api_key) # Pass api_key to fallback
         if df is None or df.empty:
             st.warning("Fallback ticker also failed. Loading sample data...")
-            sample_size = 120  # Increased to ensure enough rows after indicators
+            sample_size = num_historical_days + 60 # Ensure enough for indicators + training, min 120 is covered
+            if sample_size < 120: sample_size = 120 # Still ensure minimum for sample data generation
             dates = pd.date_range(start=start_date, periods=sample_size)
             df = pd.DataFrame({
                 'Open': np.random.uniform(1000, 2000, size=sample_size),
@@ -106,17 +113,13 @@ if predict_btn:
     df = add_technical_indicators(df)
     st.write(f"Rows remaining after adding indicators: {len(df)}")
     if df is None or df.empty:
-        st.error("Not enough data after adding technical indicators. Please select a longer date range (at least 60 days). ")
+        st.error("Not enough data after adding technical indicators. Please increase 'Historical Days for Training' (min 60 days recommended). ") # Updated message
         st.stop()
 
     st.success("✅ Data loaded and indicators added")
 
-    # Check for minimum rows for models
-    if len(df) < 60:
-        st.error(f"Not enough data for model training. At least 60 rows are required after indicators, but only {len(df)} rows are available. Please select a longer date range.")
-        st.stop()
     if len(df) < num_prediction_days:
-        st.error(f"Not enough historical data to make {num_prediction_days} predictions. Only {len(df)} rows available. Please select a longer date range or fewer prediction days.")
+        st.error(f"Not enough historical data ({len(df)} rows) to make {num_prediction_days} predictions. Please increase 'Historical Days for Training' or select fewer prediction days.") # Updated message
         st.stop()
 
     try:
