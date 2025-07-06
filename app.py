@@ -70,6 +70,11 @@ if predict_btn:
     st.info("📅 Fetching data...")
     df = fetch_stock_data(stock_symbol, str(start_date), str(end_date))
     df = add_technical_indicators(df)
+
+    if df is None or df.empty:
+        st.error("No data found for the selected stock and date range. Please try a different range or stock.")
+        st.stop()
+
     st.success("✅ Data loaded and indicators added")
 
     with st.spinner("Training SVM & RF models..."):
