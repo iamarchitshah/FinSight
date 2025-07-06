@@ -36,26 +36,26 @@ st.sidebar.title("⚙️ Settings")
 
 # NSE Stock Dropdown
 tickers = {
-    "Reliance Industries": "RELIANCE.NS",
-    "Tata Consultancy Services (TCS)": "TCS.NS",
-    "Infosys": "INFY.NS",
-    "Wipro": "WIPRO.NS",
-    "HDFC Bank": "HDFCBANK.NS",
-    "ICICI Bank": "ICICIBANK.NS",
-    "State Bank of India (SBI)": "SBIN.NS",
-    "Adani Enterprises": "ADANIENT.NS",
-    "Hindustan Unilever": "HINDUNILVR.NS",
-    "Bharti Airtel": "BHARTIARTL.NS",
-    "Larsen & Toubro": "LT.NS",
-    "Asian Paints": "ASIANPAINT.NS",
-    "Maruti Suzuki": "MARUTI.NS",
-    "Bajaj Finance": "BAJFINANCE.NS",
-    "Axis Bank": "AXISBANK.NS",
-    "Tech Mahindra": "TECHM.NS",
-    "Coal India": "COALINDIA.NS",
-    "Titan Company": "TITAN.NS",
-    "JSW Steel": "JSWSTEEL.NS",
-    "Tata Steel": "TATASTEEL.NS"
+    "Reliance Industries": "RELIANCE.BSE",
+    "Tata Consultancy Services (TCS)": "TCS.BSE",
+    "Infosys": "INFY.BSE",
+    "Wipro": "WIPRO.BSE",
+    "HDFC Bank": "HDFCBANK.BSE",
+    "ICICI Bank": "ICICIBANK.BSE",
+    "State Bank of India (SBI)": "SBIN.BSE",
+    "Adani Enterprises": "ADANIENT.BSE",
+    "Hindustan Unilever": "HINDUNILVR.BSE",
+    "Bharti Airtel": "BHARTIARTL.BSE",
+    "Larsen & Toubro": "LT.BSE",
+    "Asian Paints": "ASIANPAINT.BSE",
+    "Maruti Suzuki": "MARUTI.BSE",
+    "Bajaj Finance": "BAJFINANCE.BSE",
+    "Axis Bank": "AXISBANK.BSE",
+    "Tech Mahindra": "TECHM.BSE",
+    "Coal India": "COALINDIA.BSE",
+    "Titan Company": "TITAN.BSE",
+    "JSW Steel": "JSWSTEEL.BSE",
+    "Tata Steel": "TATASTEEL.BSE"
 }
 selected_company = st.sidebar.selectbox("📈 Select an NSE Stock", list(tickers.keys()))
 stock_symbol = tickers[selected_company]
