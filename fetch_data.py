@@ -13,17 +13,17 @@ def fetch_stock_data(ticker, start_date, end_date):
 
     ts = TimeSeries(key=api_key, output_format='pandas')
     try:
-        # Alpha Vantage uses 'TIME_SERIES_DAILY_ADJUSTED' for daily data
-        # It returns data in reverse chronological order
-        data, meta_data = ts.get_daily_adjusted(symbol=ticker, outputsize='full')
+        # Using TIME_SERIES_DAILY as TIME_SERIES_DAILY_ADJUSTED is a premium endpoint.
+        # This endpoint returns raw (as-traded) daily data.
+        data, meta_data = ts.get_daily(symbol=ticker, outputsize='full')
         
         if data.empty:
-            print(f"No data found for {ticker} from Alpha Vantage.")
+            print(f"No data found for {ticker} from Alpha Vantage (TIME_SERIES_DAILY).")
             return None
 
-        # Rename columns to match expected format: Open, High, Low, Close, Volume
+        # Rename columns to match expected format for TIME_SERIES_DAILY
         data.columns = [
-            'Open', 'High', 'Low', 'Close', 'adjusted close', 'Volume', 'dividend amount', 'split coefficient'
+            'Open', 'High', 'Low', 'Close', 'Volume'
         ]
         df = data[['Open', 'High', 'Low', 'Close', 'Volume']].copy()
         
