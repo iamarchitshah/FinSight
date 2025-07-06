@@ -75,10 +75,10 @@ if predict_btn:
         st.stop()
 
     df = fetch_stock_data(stock_symbol, str(start_date), str(end_date))
-    st.write(f"Fetched {len(df)} rows from Yahoo Finance.")
     if df is None or df.empty:
         st.error("No data found from Yahoo Finance for the selected stock and date range. Please try a different range or stock.")
         st.stop()
+    st.write(f"Fetched {len(df)} rows from Yahoo Finance.")
 
     df = add_technical_indicators(df)
     st.write(f"Rows remaining after adding indicators: {len(df)}")
