@@ -5,12 +5,15 @@ import streamlit as st
 import pandas as pd
 import datetime
 
-from fetch_data import fetch_stock_data
-from indicators import add_technical_indicators
-from svm_model import train_svm_model, predict_next_7_days as svm_predict
-from rf_model import train_rf_model, predict_next_7_days as rf_predict
-from lstm_model import train_lstm_model, predict_lstm_next_7_days
-from rnn_model import train_rnn_model, predict_rnn_next_7_days
+
+from utils.indicators import add_technical_indicators
+from utils.fetch_data import fetch_stock_data
+
+from models.svm_model import train_svm_model, predict_next_7_days as svm_predict
+from models.rf_model import train_rf_model, predict_next_7_days as rf_predict
+from models.lstm_model import train_lstm_model, predict_lstm_next_7_days
+from models.rnn_model import train_rnn_model, predict_rnn_next_7_days
+
 from aggregator import combine_ensemble_predictions
 os.environ["XDG_CONFIG_HOME"] = os.path.join(os.getcwd(), ".streamlit")
 
