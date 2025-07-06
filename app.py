@@ -81,7 +81,7 @@ if predict_btn:
 
     api_key = st.secrets.get("ALPHAVANTAGE_API_KEY")
     if not api_key:
-        st.error("Alpha Vantage API key not found. Please set it in .streamlit/secrets.toml. Example: ALPHAVANTAGE_API_KEY = "YOUR_KEY"")
+        st.error("Alpha Vantage API key not found. Please set it in .streamlit/secrets.toml. Example: ALPHAVANTAGE_API_KEY = \"YOUR_KEY\"")
         st.stop()
 
     # Validate the number of historical days selected
