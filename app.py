@@ -68,11 +68,22 @@ st.title("📈 Indian Stock Market Prediction using ML + DL Ensemble")
 
 if predict_btn:
     st.info("📅 Fetching data...")
-    df = fetch_stock_data(stock_symbol, str(start_date), str(end_date))
-    df = add_technical_indicators(df)
+    # Check minimum date range
+    min_days = 60
+    if (end_date - start_date).days < min_days:
+        st.error(f"Please select a date range of at least {min_days} days for meaningful predictions (currently {(end_date - start_date).days} days selected). Try a wider range.")
+        st.stop()
 
+    df = fetch_stock_data(stock_symbol, str(start_date), str(end_date))
+    st.write(f"Fetched {len(df)} rows from Yahoo Finance.")
     if df is None or df.empty:
-        st.error("No data found for the selected stock and date range. Please try a different range or stock.")
+        st.error("No data found from Yahoo Finance for the selected stock and date range. Please try a different range or stock.")
+        st.stop()
+
+    df = add_technical_indicators(df)
+    st.write(f"Rows remaining after adding indicators: {len(df)}")
+    if df is None or df.empty:
+        st.error("Not enough data after adding technical indicators. Please select a longer date range (at least 60 days).")
         st.stop()
 
     st.success("✅ Data loaded and indicators added")
