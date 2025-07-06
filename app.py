@@ -60,7 +60,7 @@ tickers = {
 selected_company = st.sidebar.selectbox("📈 Select an NSE Stock", list(tickers.keys()))
 stock_symbol = tickers[selected_company]
 
-start_date = st.sidebar.date_input("Start Date", datetime.date.today())
+start_date = st.sidebar.date_input("Start Date", datetime.date(2022, 1, 1))
 num_prediction_days = st.sidebar.number_input("🔮 Predict Next N Days", min_value=1, max_value=30, value=7)
 predict_btn = st.sidebar.button("🔮 Generate Prediction")
 
