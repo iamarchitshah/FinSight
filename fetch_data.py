@@ -1,14 +1,11 @@
 # fetch_data.py
 
-import streamlit as st # Import streamlit for st.secrets
 from alpha_vantage.timeseries import TimeSeries
 import pandas as pd
 
-def fetch_stock_data(ticker, start_date, end_date):
-    api_key = st.secrets.get("ALPHAVANTAGE_API_KEY")
+def fetch_stock_data(ticker, start_date, end_date, api_key):
     if not api_key:
-        print("ALPHAVANTAGE_API_KEY not found in Streamlit secrets.")
-        st.error("Alpha Vantage API key not found. Please set it in .streamlit/secrets.toml")
+        print("Alpha Vantage API key not provided to fetch_stock_data.")
         return None
 
     ts = TimeSeries(key=api_key, output_format='pandas')
@@ -23,11 +20,16 @@ def fetch_stock_data(ticker, start_date, end_date):
 
         # Rename columns to match expected format for TIME_SERIES_DAILY
         data.columns = [
-            'Open', 'High', 'Low', 'Close', 'Volume'
+            '1. open', '2. high', '3. low', '4. close', '5. volume' # Corrected Alpha Vantage column names
         ]
-        df = data[['Open', 'High', 'Low', 'Close', 'Volume']].copy()
+        df = data[['1. open', '2. high', '3. low', '4. close', '5. volume']].copy()
         
+        # Rename to generic names for consistency in other modules
+        df.columns = ['Open', 'High', 'Low', 'Close', 'Volume']
+
         # Filter by date range (Alpha Vantage returns all history by default)
+        # Ensure index is datetime for .loc to work correctly
+        df.index = pd.to_datetime(df.index)
         df = df.loc[start_date:end_date]
         
         df.dropna(inplace=True)
@@ -36,25 +38,19 @@ def fetch_stock_data(ticker, start_date, end_date):
         return df
     except Exception as e:
         print(f"Failed to fetch data for {ticker} from Alpha Vantage: {e}")
-        # Check for common Alpha Vantage errors
-        if "limit" in str(e).lower():
-            st.error("Alpha Vantage API daily/minute limit reached. Please wait or consider upgrading your plan.")
-        elif "invalid api key" in str(e).lower():
-            st.error("Invalid Alpha Vantage API key. Please check your .streamlit/secrets.toml file.")
-        else:
-            st.error(f"Failed to fetch data from Alpha Vantage. Error: {e}")
         return None
 
 if __name__ == "__main__":
-    # This part needs to be adapted as st.secrets is not available outside a Streamlit app context
-    # For local testing of fetch_data.py, you would typically set an environment variable or manually assign the key
-    print("Note: Direct execution of fetch_data.py using st.secrets will fail outside Streamlit app.")
-    print("Please run the main app.py to test Alpha Vantage integration.")
-    # Example usage for testing (requires setting ALPHAVANTAGE_API_KEY as env var manually for this script)
-    # os.environ["ALPHAVANTAGE_API_KEY"] = os.getenv("ALPHAVANTAGE_API_KEY", "YOUR_DUMMY_API_KEY_HERE")
-    # data = fetch_stock_data("RELIANCE.NS", "2022-01-01", "2024-12-31")
-    # if data is not None:
-    #    data.to_csv("data_sample_av.csv")
-    #    print("Data saved to data_sample_av.csv")
-    # else:
-    #    print("Failed to fetch data for example.")
+    # This block is for independent testing of fetch_data.py
+    # It requires an API key to be set manually as an environment variable for testing outside Streamlit context
+    import os
+    dummy_api_key = os.getenv("ALPHAVANTAGE_API_KEY", "YOUR_DUMMY_API_KEY_HERE") # Replace with your actual key for testing
+    if dummy_api_key == "YOUR_DUMMY_API_KEY_HERE":
+        print("Please set ALPHAVANTAGE_API_KEY environment variable for standalone testing, or provide a dummy key.")
+
+    data = fetch_stock_data("RELIANCE.BSE", "2022-01-01", "2024-12-31", dummy_api_key)
+    if data is not None and not data.empty:
+        print("Sample data fetched successfully:")
+        print(data.head())
+    else:
+        print("Failed to fetch data for example in standalone test.")
